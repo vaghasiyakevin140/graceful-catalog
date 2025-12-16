@@ -1,15 +1,33 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Minus, Plus, Trash2, ShoppingBag, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { closeCart, removeFromCart, updateQuantity, selectCartTotal, selectCartItemsCount } from '@/store/slices/cartSlice';
+import { closeCart, removeFromCart, updateQuantity, clearCart, selectCartTotal, selectCartItemsCount } from '@/store/slices/cartSlice';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { toast } from '@/hooks/use-toast';
 
 const CartDrawer = () => {
   const dispatch = useAppDispatch();
   const { items, isOpen } = useAppSelector((state) => state.cart);
   const total = useAppSelector(selectCartTotal);
   const itemsCount = useAppSelector(selectCartItemsCount);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    // Simulate checkout process
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    toast({
+      title: "Order Placed Successfully!",
+      description: `Your order of $${total.toFixed(2)} has been confirmed. Thank you for shopping with LUXE!`,
+    });
+    
+    dispatch(clearCart());
+    dispatch(closeCart());
+    setIsCheckingOut(false);
+  };
 
   return (
     <AnimatePresence>
@@ -141,8 +159,31 @@ const CartDrawer = () => {
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-serif text-2xl gold-text">${total.toFixed(2)}</span>
                 </div>
-                <Button className="w-full h-14 text-lg font-medium" size="lg">
-                  Checkout
+                <Button 
+                  className="w-full h-14 text-lg font-medium" 
+                  size="lg"
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                >
+                  {isCheckingOut ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center gap-2"
+                    >
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
+                      />
+                      Processing...
+                    </motion.div>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Checkout — ${total.toFixed(2)}
+                    </>
+                  )}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
                   Shipping and taxes calculated at checkout
