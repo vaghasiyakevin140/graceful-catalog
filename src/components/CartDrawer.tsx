@@ -1,32 +1,52 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, Trash2, ShoppingBag, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { closeCart, removeFromCart, updateQuantity, clearCart, selectCartTotal, selectCartItemsCount } from '@/store/slices/cartSlice';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks/use-toast';
 
 const CartDrawer = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { items, isOpen } = useAppSelector((state) => state.cart);
   const total = useAppSelector(selectCartTotal);
   const itemsCount = useAppSelector(selectCartItemsCount);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const generateOrderNumber = () => {
+    return 'LX' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+  };
 
   const handleCheckout = async () => {
     setIsCheckingOut(true);
     // Simulate checkout process
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    toast({
-      title: "Order Placed Successfully!",
-      description: `Your order of $${total.toFixed(2)} has been confirmed. Thank you for shopping with LUXE!`,
-    });
+    const orderData = {
+      items: items.map(item => ({
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      })),
+      total,
+      orderNumber: generateOrderNumber(),
+      date: new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }),
+    };
     
     dispatch(clearCart());
     dispatch(closeCart());
     setIsCheckingOut(false);
+    
+    navigate('/order-confirmation', { state: orderData });
   };
 
   return (

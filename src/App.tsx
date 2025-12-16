@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { store, persistor } from "./store";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,8 +22,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+            <Route path="/" element={<Index />} />
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
